@@ -1,0 +1,10 @@
+plex:
+  baseurl: "http://127.0.0.1:32400"
+  token: "your-plex-token"
+
+listenbrainz:
+  token: "your-listenbrainz-token"
+
+user:
+  target_username: "specific-plex-username"
+  library_section_ids: [1224]  # List of library section IDs to filter (optional)
