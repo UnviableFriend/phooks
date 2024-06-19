@@ -8,3 +8,12 @@ listenbrainz:
 user:
   target_username: "specific-plex-username"
   library_section_ids: [1224]  # List of library section IDs to filter (optional)
+
+logging:
+  enable_file_logging: true
+  log_file: "error.log"
+
+caching:
+  enable_payload_cache: true
+  enable_webhook_cache: true
+  cache_dir: "cache"
