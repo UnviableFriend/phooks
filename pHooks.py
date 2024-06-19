@@ -10,10 +10,14 @@ import requests
 import time
 import yaml
 import json
+import gzip
+import os
+import datetime
+import re
 from urllib.parse import urljoin
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -28,8 +32,48 @@ LISTENBRAINZ_URL = 'https://api.listenbrainz.org/1/submit-listens'
 LISTENBRAINZ_TOKEN = config.get('listenbrainz', {}).get('token', '')
 TARGET_USERNAME = config.get('user', {}).get('target_username', '')
 LIBRARY_SECTION_IDS = config.get('user', {}).get('library_section_ids', [])
+CACHE_DIR = config.get('caching', {}).get('cache_dir', 'cache')
+ENABLE_PAYLOAD_CACHE = config.get('caching', {}).get('enable_payload_cache', False)
+ENABLE_WEBHOOK_CACHE = config.get('caching', {}).get('enable_webhook_cache', False)
+ENABLE_FILE_LOGGING = config.get('logging', {}).get('enable_file_logging', False)
+LOG_FILE = config.get('logging', {}).get('log_file', 'error.log')
 
+# Setup logging to file if enabled
+if ENABLE_FILE_LOGGING:
+    file_handler = logging.FileHandler(LOG_FILE)
+    file_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+# Ensure cache directory exists
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+
+# Connect to Plex server
 plex = PlexServer(PLEX_URL, PLEX_TOKEN)
+
+def get_weekly_cache_filename(cache_type):
+    current_time = datetime.datetime.now()
+    year = current_time.year
+    week = current_time.isocalendar()[1]
+    return os.path.join(CACHE_DIR, f'{cache_type}_cache_{year}_week_{week}.json.gz')
+
+def append_to_cache(new_payload, cache_type):
+    try:
+        cache_file = get_weekly_cache_filename(cache_type)
+        cache_data = []
+
+        if os.path.exists(cache_file):
+            with gzip.open(cache_file, 'rt', encoding='utf-8') as file:
+                cache_data = json.load(file)
+
+        cache_data.append(new_payload)
+
+        with gzip.open(cache_file, 'wt', encoding='utf-8') as file:
+            json.dump(cache_data, file, indent=4)
+    except Exception as e:
+        logger.error(f"Failed to append to {cache_type} cache: {e}")
 
 def get_file_metadata(file_path):
     try:
@@ -56,6 +100,15 @@ def get_file_metadata(file_path):
         logger.error(f"Failed to read metadata from {file_path}: {e}")
         return None
 
+def parse_discnumber(discnumber):
+    if not discnumber:
+        return None
+    # Split by '/' and take the first part, which should be the main disc number
+    match = re.match(r'(\d+)', discnumber)
+    if match:
+        return int(match.group(1))
+    return None
+
 def build_listen_payload(playback, metadata, listen_type="single"):
     additional_info = { 
         'duration_ms': metadata.get('duration', 0) * 1000,
@@ -70,7 +123,7 @@ def build_listen_payload(playback, metadata, listen_type="single"):
         'submission_client': "Plex to ListenBrainz with Webhooks",
         'submission_client_version': "1.0.0",
         'tracknumber': playback.index,
-        'discnumber': int(metadata['discnumber']) if metadata.get('discnumber') is not None else None,
+        'discnumber': parse_discnumber(metadata.get('discnumber')),
         'albumartist': metadata.get('albumartist'),
         'date': metadata.get('date'),
         'totaltracks': int(metadata['tracktotal']) if metadata.get('tracktotal') is not None else None,
@@ -127,6 +180,9 @@ def webhook():
 
     logger.info(f"Event: {event}")
 
+    if ENABLE_WEBHOOK_CACHE:
+        append_to_cache(json_data, "webhook")
+
     try:
         track = plex.fetchItem(track_key)
     except Exception as e:
@@ -148,6 +204,10 @@ def webhook():
         return jsonify({"status": "ignored", "reason": "unsupported event"}), 200
 
     logger.info(f"Prepared listen payload: {listen_payload}")
+
+    # Optionally cache the payload
+    if ENABLE_PAYLOAD_CACHE and event == 'media.scrobble':
+        append_to_cache(listen_payload, "listen")
 
     auth_header = {"Authorization": f"Token {LISTENBRAINZ_TOKEN}"}
     response = requests.post(LISTENBRAINZ_URL, json=listen_payload, headers=auth_header)
