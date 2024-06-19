@@ -45,7 +45,7 @@ def get_file_metadata(file_path):
             logger.warning(f"Unsupported file type: {file_path}")
             return None
 
-        tags = ['artist', 'title', 'album', 'musicbrainz_trackid', 'musicbrainz_releasegroupid', 'musicbrainz_albumid', 'musicbrainz_releasetrackid', 'isrc']
+        tags = ['artist', 'title', 'album', 'musicbrainz_trackid', 'musicbrainz_releasegroupid', 'musicbrainz_albumid', 'musicbrainz_releasetrackid', 'isrc', 'discnumber', 'albumartist', 'date', 'tracktotal', 'disctotal']
         metadata = {tag: audio.get(tag, [None])[0] for tag in tags}
         metadata['duration'] = int(audio.info.length)
         metadata['work_mbids'] = audio.get('musicbrainz_workid', [])
@@ -69,7 +69,12 @@ def build_listen_payload(playback, metadata, listen_type="single"):
         'media_player': "Plex",
         'submission_client': "Plex to ListenBrainz with Webhooks",
         'submission_client_version': "1.0.0",
-        'tracknumber': playback.index
+        'tracknumber': playback.index,
+        'discnumber': metadata.get('discnumber'),
+        'albumartist': metadata.get('albumartist'),
+        'date': metadata.get('date'),
+        'totaltracks': metadata.get('tracktotal'),
+        'totaldiscs': metadata.get('disctotal')
     }
 
     # Remove keys with None values
