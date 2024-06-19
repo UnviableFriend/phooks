@@ -17,14 +17,14 @@ These are the fields supported by various players/submission tools from my testi
 | track_metadata.additional_info.release_group_mbid    | ✔           |             | ✔         | ✔       |        | ✔       |           |               |         |
 | track_metadata.additional_info.isrc                  | ✔           |             | ✔         | ✔       |        |          |           |               | ✔      |
 | track_metadata.additional_info.track_mbid            | ✔           |             | ✔         | ✔       |        |          |           |               |         |
-| track_metadata.additional_info.discnumber            |             |             | ✔         |          |        |          |           |               | ✔      |
+| track_metadata.additional_info.discnumber            | ✔           |             | ✔         |          |        |          |           |               | ✔      |
 | track_metadata.additional_info.listening_from        |             | ✔          |            |          |        |          |           |               |         |
 | track_metadata.additional_info.work_mbids            | ✔           |             | ✔         |          |        |          |           |               |         |
-| track_metadata.additional_info.albumartist           |             |             | ✔         |          |        |          |           |               |         |
-| track_metadata.additional_info.date                  |             |             | ✔         |          |        |          |           |               |         |
+| track_metadata.additional_info.albumartist           | ✔           |             | ✔         |          |        |          |           |               |         |
+| track_metadata.additional_info.date                  | ✔           |             | ✔         |          |        |          |           |               |         |
 | track_metadata.additional_info.media_player_version  |             |             | ✔         |          |        |          |           |               |         |
-| track_metadata.additional_info.totaltracks           |             |             | ✔         |          |        |          |           |               |         |
-| track_metadata.additional_info.totaldiscs            |             |             | ✔         |          |        |          |           |               |         |
+| track_metadata.additional_info.totaltracks           | ✔           |             | ✔         |          |        |          |           |               |         |
+| track_metadata.additional_info.totaldiscs            | ✔           |             | ✔         |          |        |          |           |               |         |
 | track_metadata.additional_info.tags                  |             |             |            | ✔       |        |          |           |               |         |
 | track_metadata.additional_info.lastfm_track_mbid     |             |             |            |          | ✔     |          |           |               |         |
 | track_metadata.additional_info.lastfm_artist_mbid    |             |             |            |          | ✔     |          |           |               |         |
