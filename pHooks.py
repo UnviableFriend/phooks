@@ -70,11 +70,11 @@ def build_listen_payload(playback, metadata, listen_type="single"):
         'submission_client': "Plex to ListenBrainz with Webhooks",
         'submission_client_version': "1.0.0",
         'tracknumber': playback.index,
-        'discnumber': metadata.get('discnumber'),
+        'discnumber': int(metadata['discnumber']) if metadata.get('discnumber') is not None else None,
         'albumartist': metadata.get('albumartist'),
         'date': metadata.get('date'),
-        'totaltracks': metadata.get('tracktotal'),
-        'totaldiscs': metadata.get('disctotal')
+        'totaltracks': int(metadata['tracktotal']) if metadata.get('tracktotal') is not None else None,
+        'totaldiscs': int(metadata['disctotal']) if metadata.get('disctotal') is not None else None
     }
 
     # Remove keys with None values
