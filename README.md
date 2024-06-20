@@ -33,3 +33,10 @@ This script uses [Plex webhooks](https://support.plex.tv/articles/115002267687-w
 * `python phooks.py` Run the script
 
 **BIG NOTE** If you want to use this, you will likely want to run it as a service so it starts with your server and is always running. I can not help you here. Ask Google/ChatGPT/your IT friend how to do that for your particular Operating System/Environment. 
+
+## Features
+- Detailed tag submission including MBIDs & ISRCs. See [Supported Fields Comparison](metadataSupport.md)
+- Now Playing support
+- (Optional) Local JSON cache of submitted listens
+- (Optional) Local JSON cache of webhooks triggering a submission(Could be useful if there is submission failure or debugging)
+- (Optional) Error logging
