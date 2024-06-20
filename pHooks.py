@@ -60,20 +60,28 @@ def get_weekly_cache_filename(cache_type):
     return os.path.join(CACHE_DIR, f'{cache_type}_cache_{year}_week_{week}.json.gz')
 
 def append_to_cache(new_payload, cache_type):
-    try:
-        cache_file = get_weekly_cache_filename(cache_type)
-        cache_data = []
+    cache_file = get_weekly_cache_filename(cache_type)
+    cache_data = []
 
+    try:
         if os.path.exists(cache_file):
             with gzip.open(cache_file, 'rt', encoding='utf-8') as file:
-                cache_data = json.load(file)
+                try:
+                    cache_data = json.load(file)
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to read {cache_type} cache file: {e}")
+                    cache_data = []
+    except Exception as e:
+        logger.error(f"Unexpected error when reading {cache_type} cache file: {e}")
+        cache_data = []
 
-        cache_data.append(new_payload)
+    cache_data.append(new_payload)
 
+    try:
         with gzip.open(cache_file, 'wt', encoding='utf-8') as file:
             json.dump(cache_data, file, indent=4)
     except Exception as e:
-        logger.error(f"Failed to append to {cache_type} cache: {e}")
+        logger.error(f"Failed to write to {cache_type} cache file: {e}")
 
 def get_file_metadata(file_path):
     try:
