@@ -20,6 +20,7 @@ This was created by ChatGPT 4o. I will not and can not support this. Take it, us
 This script uses [Plex webhooks](https://support.plex.tv/articles/115002267687-webhooks/) so it is limited by them.
 * Listen Submission percent is limited. The Plex docs state "`media.scrobble` – Media is viewed (played past the 90% mark).", however in my experience testing this script the webhook happens at 50%, and I see no way to configure that.
 * Looping tracks. While `media.scrobble` will happen if you have a song on repeat, `media.play` only seems to happen the first play. So your "Now Playing" on ListenBrainz may stop showing you are actively listening to something
+* As this script uses Webhooks, it *can't* submit offline listens where your device isn't connected to Plex. Plex sends webhooks for active streams, not for past offline ones. (Downloads/Synced media should work fine if there is a connection however)
 
 ## How to use
 **THIS SCRIPT NEEDS TO RUN ON THE SAME SYSTEM AS YOUR PLEX SERVER**. The way it works is the webhook contains a Plex ID for the track you are listening to, it then takes that ID and looks it up with the [PlexAPI](https://github.com/pkkid/python-plexapi) to get the location of the file, which it then reads the tags from. If the file paths do not match for what this script sees, *it will not work*.
